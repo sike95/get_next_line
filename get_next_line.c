@@ -5,45 +5,63 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: mmpofu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/09/13 11:01:57 by mmpofu            #+#    #+#             */
-/*   Updated: 2017/09/13 18:33:28 by mmpofu           ###   ########.fr       */
+/*   Created: 2017/06/19 20:35:45 by mmpofu            #+#    #+#             */
+/*   Updated: 2017/09/18 18:18:45 by mmpofu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include "libft/libft.h"
 
-int		get_next_line(const int fd, char **line)
+int		read_from_fd(t_gnl *var, int fd, char **line)
 {
-	char		buff[BUFF_SIZE + 1];
-	static char	*save;
-	char		*newline;
-	int			i;
-	int			ret;
-
-	newline = (char*)malloc(sizeof(char) * BUFF_SIZE);
-	newline[BUFF_SIZE] = '\0';
-	// check if something in save and get lines from save until no newline
-	while ((ret = read(fd, buff, BUFF_SIZE)))
+	while ((var->ret = read(fd, var->buff, BUFF_SIZE)) > 0)
 	{
-		buff[ret] = '\0';
-		ft_strcat(newline, buff);
-		if (ft_strchr(newline, '\n'))
+		var->buff[var->ret] = '\0';
+		if (ft_strchr(var->buff, '\n'))
 		{
-			*line = ft_strjoin(*line, ft_strsub(buff, 0,
-						ft_strlen(buff) - strlen(save)));
+			var->save = ft_strdup(ft_strchr(var->buff, '\n'));
+			var->temp = *line;
+			*line = ft_strjoin(var->temp, ft_strsub(var->buff, 0,
+						ft_strlen(var->buff) - ft_strlen(var->save)));
+			var->save++;
+			free(var->temp);
+			return (1);
 		}
-		
+		var->temp = *line;
+		*line = ft_strjoin(var->temp, var->buff);
+		free(var->temp);
 	}
+	if (var->ret < 0)
+		return (var->ret);
+	if (**line)
+		return (1);
 	return (0);
 }
 
-int		main()
+int		get_next_line(const int fd, char **line)
 {
-	int		fd;
-	char	*line;
+	static t_gnl var;
 
-	fd = open("text.txt", O_RDONLY);
-	printf("%d", get_next_line(fd, &line));
-
-	return (0);
+	if (line == NULL)
+		return (-1);
+	*line = ft_strnew(0);
+	if (var.save)
+	{
+		var.temp = *line;
+		*line = ft_strjoin(var.temp, var.save);
+		free(var.temp);
+		if (ft_strchr(*line, '\n'))
+		{
+			var.save = ft_strdup(ft_strchr(*line, '\n'));
+			var.temp = *line;
+			*line = ft_strsub(var.temp, 0, ft_strlen(var.temp)
+					- ft_strlen(var.save));
+			free(var.temp);
+			var.save++;
+			return (1);
+		}
+		var.save = NULL;
+	}
+	return (read_from_fd(&var, fd, line));
 }

@@ -1,33 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   ft_strstr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mmpofu <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/09/13 11:04:45 by mmpofu            #+#    #+#             */
-/*   Updated: 2017/09/14 20:23:49 by mmpofu           ###   ########.fr       */
+/*   Created: 2017/06/01 00:42:58 by mmpofu            #+#    #+#             */
+/*   Updated: 2017/08/31 14:40:48 by mmpofu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-# define BUFF_SIZE 32
+#include "libft.h"
 
-# include <stdio.h>
-# include <stdlib.h>
-# include <fcntl.h>
-# include <sys/types.h>
-# include <unistd.h>
-
-typedef struct	s_gnl
+char	*ft_strstr(const char *big, const char *little)
 {
-	char		buff[BUFF_SIZE + 1];
-	int			ret;
-	char		*temp;
-	char		*save;
-}				t_gnl;
+	int x;
+	int y;
 
-int				get_next_line(const int fd, char **line);
-
-#endif
+	x = 0;
+	if (ft_strlen(little) == 0)
+		return ((char *)big);
+	while (big[x] != '\0')
+	{
+		y = 0;
+		while (big[x + y] == little[y])
+		{
+			y++;
+			if (little[y] == '\0')
+				return ((char *)big + x);
+		}
+		x++;
+	}
+	return (NULL);
+}
